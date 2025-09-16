@@ -3,6 +3,27 @@ const app = require('./app');
 
 
 describe('ToDos', () => {
+     beforeEach(async () => {
+        await request(app).post('/__reset'); //reset for each test
+    });
+
+    it('GET /todos --> array todos', async () => {
+        const res = await request(app).get('/todos')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+        // /todos returns a paginated shape, check items array
+        expect(res.body.items).toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            completed: expect.any(Boolean),
+            }),
+        ])
+        );
+    });
+
     it('GET /todos --> array todos', () => {
         return request(app)
             .get('/todos')
@@ -67,6 +88,9 @@ describe('ToDos', () => {
             .expect(422);
     });
 
-
-
+    it('DELETE /todos/id --> delete todo by id', () => {
+        return request(app)
+            .delete('/todos/1')
+            .expect(204);
+    });
 })
